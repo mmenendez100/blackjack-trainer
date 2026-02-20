@@ -24,8 +24,8 @@
     --gold: #d4af37;
     --red: #dc3545;
     --blue: #4a90d9;
-    --card-w: 76px;
-    --card-h: 108px;
+    --card-w: 90px;
+    --card-h: 128px;
     --radius: 12px;
     --radius-sm: 8px;
     --felt: #166534;
@@ -231,8 +231,8 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 6px 8px;
-    font-size: 15px;
+    padding: 7px 9px;
+    font-size: 17px;
     font-weight: 700;
     position: relative;
     animation: dealIn .25s ease-out;
@@ -245,7 +245,7 @@
   }
 
   .card .top { text-align: left; line-height: 1.1; }
-  .card .center { text-align: center; font-size: 26px; line-height: 1; }
+  .card .center { text-align: center; font-size: 30px; line-height: 1; }
   .card .bottom { text-align: right; line-height: 1.1; transform: rotate(180deg); }
 
   .card.red { color: #dc2626; }
@@ -872,8 +872,8 @@
   /* ─── Mobile ─── */
   @media (max-width: 640px) {
     :root {
-      --card-w: 60px;
-      --card-h: 86px;
+      --card-w: 68px;
+      --card-h: 96px;
     }
 
     body { padding: 0; }
@@ -931,7 +931,7 @@
       border-radius: 6px;
     }
 
-    .card .center { font-size: 20px; }
+    .card .center { font-size: 22px; }
 
     .card-back { border-radius: 6px; }
     .card-back::after { width: 20px; height: 20px; }
@@ -1018,8 +1018,8 @@
 
   @media (max-width: 380px) {
     :root {
-      --card-w: 50px;
-      --card-h: 72px;
+      --card-w: 56px;
+      --card-h: 80px;
     }
 
     #table { border-radius: 40px 40px 8px 8px; padding: 16px 8px 12px; }
@@ -1952,7 +1952,7 @@ function renderAll() {
       const e = evalHand(dealerHand);
       dealerScoreEl.innerHTML = `<span class="${e.busted ? 'bust' : ''}">${e.total}${e.busted ? ' BUST' : ''}</span>`;
     } else {
-      dealerScoreEl.textContent = dealerUpcardKey(dealerHand[0]);
+      dealerScoreEl.textContent = '';
     }
   }
 
@@ -1969,9 +1969,11 @@ function renderAll() {
       const label = playerHands.length > 1 ? `Hand ${i + 1}` : 'Your Hand';
 
       let scoreHtml = '';
-      if (e.busted) scoreHtml = '<span class="bust">' + e.total + ' BUST</span>';
-      else if (isBlackjack(h.cards) && !h.isFromSplit) scoreHtml = '<span class="bj">BLACKJACK</span>';
-      else scoreHtml = `${e.total}${e.isSoft ? ' soft' : ''}`;
+      if (gamePhase === 'result') {
+        if (e.busted) scoreHtml = '<span class="bust">' + e.total + ' BUST</span>';
+        else if (isBlackjack(h.cards) && !h.isFromSplit) scoreHtml = '<span class="bj">BLACKJACK</span>';
+        else scoreHtml = `${e.total}${e.isSoft ? ' soft' : ''}`;
+      }
 
       let resultHtml = '';
       if (gamePhase === 'result' && h.result) {
