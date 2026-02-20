@@ -798,6 +798,30 @@
     background: rgba(255,255,255,.04);
   }
 
+  .timer-skip {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 2px 10px;
+    height: 24px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all .15s;
+    flex-shrink: 0;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .timer-skip:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,.2);
+    background: rgba(255,255,255,.04);
+  }
+
   /* ─── Mobile ─── */
   @media (max-width: 640px) {
     :root {
@@ -1021,6 +1045,7 @@
           <button class="timer-pause" id="timer-pause-btn" onclick="toggleAutodealPause()" title="Pause">&#9646;&#9646;</button>
           <div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div>
           <span class="timer-label" id="timer-label">0s</span>
+          <button class="timer-skip" id="timer-skip-btn" onclick="skipAutodealTimer()" title="Skip">Skip &#9654;</button>
         </div>
       </div>
     </div>
@@ -2037,6 +2062,11 @@ function cancelAutodealTimer() {
   if (timerEl) timerEl.classList.remove('visible');
   const fillEl = document.getElementById('timer-fill');
   if (fillEl) { fillEl.classList.remove('running'); fillEl.style.transition = 'none'; fillEl.style.width = '100%'; }
+}
+
+function skipAutodealTimer() {
+  cancelAutodealTimer();
+  if (gamePhase === 'result' && settings.autoDeal) continueDeal();
 }
 
 function toggleAutodealPause() {
