@@ -3379,6 +3379,8 @@ function startHand(bet) {
   hideTip();
   hideFeedback();
   gamePhase = 'dealing';
+  prevDealerCardCount = 0;
+  prevPlayerCardCounts = [0];
   renderAll();
 
   // Stagger card dealing: player1, dealer1, player2, dealer2
@@ -3404,7 +3406,7 @@ function startHand(bet) {
 
     gamePhase = 'playing';
     renderAll();
-    if (settings.autoTip) setTimeout(showTip, 150);
+    if (settings.autoTip) showTip();
   }, dealDelay * 4);
 }
 
@@ -3441,7 +3443,7 @@ function playerHit() {
     advanceHand();
   }
   renderAll();
-  if (gamePhase === 'playing' && settings.autoTip) setTimeout(showTip, 150);
+  if (gamePhase === 'playing' && settings.autoTip) showTip();
 }
 
 function playerStand() {
@@ -3664,16 +3666,20 @@ function resetAndClose() {
 // ═══════════════════════════════════════════════════════
 
 let cardIdx = 0;
-function renderCard(card, faceDown) {
+// Track how many cards were rendered last time so only new cards animate
+let prevDealerCardCount = 0;
+let prevPlayerCardCounts = [];
+
+function renderCard(card, faceDown, shouldAnimate) {
   const rot = ((cardIdx++ * 1.7) % 5 - 2.5).toFixed(1);
   const z = cardIdx;
+  const animStyle = shouldAnimate ? '' : 'animation:none;';
   if (faceDown) {
-    // Render as flip container with both faces so it can animate
     const col = cardColor(card);
     return `<div class="card-flip-container" style="--card-rot:${rot}deg;--card-z:${z}">
       <div class="card-flip-inner">
-        <div class="card-back"></div>
-        <div class="card ${col}">
+        <div class="card-back" style="${animStyle}"></div>
+        <div class="card ${col}" style="${animStyle}">
           <div class="top">${card.rank}<br>${card.suit}</div>
           <div class="center">${card.suit}</div>
           <div class="bottom">${card.rank}<br>${card.suit}</div>
@@ -3682,7 +3688,7 @@ function renderCard(card, faceDown) {
     </div>`;
   }
   const col = cardColor(card);
-  return `<div class="card ${col}" style="--card-rot:${rot}deg;--card-z:${z}">
+  return `<div class="card ${col}" style="--card-rot:${rot}deg;--card-z:${z};${animStyle}">
     <div class="top">${card.rank}<br>${card.suit}</div>
     <div class="center">${card.suit}</div>
     <div class="bottom">${card.rank}<br>${card.suit}</div>
@@ -3699,9 +3705,13 @@ function renderAll() {
   if (dealerHand.length === 0) {
     dealerEl.innerHTML = '';
     dealerScoreEl.innerHTML = '';
+    prevDealerCardCount = 0;
   } else {
     const showAll = gamePhase === 'result';
-    let dealerCardsHtml = dealerHand.map((c, i) => renderCard(c, i === 1 && !showAll)).join('');
+    let dealerCardsHtml = dealerHand.map((c, i) => {
+      const isNew = i >= prevDealerCardCount;
+      return renderCard(c, i === 1 && !showAll, isNew);
+    }).join('');
     if (showAll) {
       const e = evalHand(dealerHand);
       const badgeCls = e.busted ? 'badge-bust' : e.total === 21 ? 'badge-21' : '';
@@ -3713,13 +3723,18 @@ function renderAll() {
       dealerScoreEl.textContent = '';
     }
     dealerEl.innerHTML = dealerCardsHtml;
+    prevDealerCardCount = dealerHand.length;
   }
 
   // Player
   const phEl = document.getElementById('player-hands');
   if (playerHands.length === 0) {
     phEl.innerHTML = `<div class="hand-area"><div class="hand-label">${t('your_hand')}</div><div class="hand-score"></div><div class="cards-row"></div></div>`;
+    prevPlayerCardCounts = [];
   } else {
+    // Ensure tracking array matches hand count
+    while (prevPlayerCardCounts.length < playerHands.length) prevPlayerCardCounts.push(0);
+
     let html = '';
     for (let i = 0; i < playerHands.length; i++) {
       const h = playerHands[i];
@@ -3746,12 +3761,14 @@ function renderAll() {
 
       const badgeCls = e.busted ? 'badge-bust' : (e.total === 21 || (isBlackjack(h.cards) && !h.isFromSplit)) ? 'badge-bj' : '';
       const badgeHtml = h.cards.length > 0 ? `<span class="hand-badge ${badgeCls}">${e.total}</span>` : '';
+      const prevCount = prevPlayerCardCounts[i] || 0;
 
       html += `<div class="split-hand ${isActive ? 'active-hand' : ''}">
         <div class="hand-label">${label} &middot; $${h.bet}</div>
         <div class="hand-score">${scoreHtml}${resultHtml}</div>
-        <div class="cards-row">${h.cards.map(c => renderCard(c)).join('')}${badgeHtml}</div>
+        <div class="cards-row">${h.cards.map((c, ci) => renderCard(c, false, ci >= prevCount)).join('')}${badgeHtml}</div>
       </div>`;
+      prevPlayerCardCounts[i] = h.cards.length;
     }
     phEl.innerHTML = html;
   }
