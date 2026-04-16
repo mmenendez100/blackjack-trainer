@@ -310,7 +310,7 @@
     font-size: 24px;
     font-weight: 700;
     position: relative;
-    animation: dealIn .9s cubic-bezier(.2,.8,.3,1);
+    animation: dealIn 1.3s cubic-bezier(.15,.7,.3,1);
     border: 1.5px solid rgba(0,0,0,.12);
     transform: rotate(var(--card-rot, 0deg));
     z-index: var(--card-z, 0);
@@ -3382,7 +3382,7 @@ function startHand(bet) {
   renderAll();
 
   // Stagger card dealing: player1, dealer1, player2, dealer2
-  const dealDelay = 620;
+  const dealDelay = 900;
   setTimeout(() => { playerHands[0].cards.push(pCard1); playSfx('deal'); renderAll(); }, dealDelay * 1);
   setTimeout(() => { dealerHand.push(dCard1); playSfx('deal'); renderAll(); }, dealDelay * 2);
   setTimeout(() => { playerHands[0].cards.push(pCard2); playSfx('deal'); renderAll(); }, dealDelay * 3);
@@ -3541,7 +3541,7 @@ function dealerDrawSequence(idx) {
     dealerHand.push(drawCard());
     playSfx('deal');
     renderAll();
-    setTimeout(() => dealerDrawSequence(idx + 1), 900);
+    setTimeout(() => dealerDrawSequence(idx + 1), 1200);
   } else {
     gamePhase = 'result';
     settleAll();
