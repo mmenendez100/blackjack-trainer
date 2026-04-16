@@ -3759,11 +3759,8 @@ function renderAll() {
     if (showAll) {
       const e = evalHand(dealerHand);
       const badgeCls = e.busted ? 'badge-bust' : e.total === 21 ? 'badge-21' : '';
-      dealerCardsHtml += `<span class="hand-badge ${badgeCls}">${e.total}</span>`;
       dealerScoreEl.innerHTML = `<span class="${e.busted ? 'bust' : ''}">${e.total}${e.busted ? ' ' + t('bust') : ''}</span>`;
-    } else if (dealerHand.length > 0) {
-      const visibleVal = evalHand([dealerHand[0]]);
-      dealerCardsHtml += `<span class="hand-badge">${visibleVal.total}</span>`;
+    } else {
       dealerScoreEl.textContent = '';
     }
     dealerEl.innerHTML = dealerCardsHtml;
@@ -3803,14 +3800,13 @@ function renderAll() {
         resultHtml = `<div><span class="result-badge ${cls}">${txt}</span></div>`;
       }
 
-      const badgeCls = e.busted ? 'badge-bust' : (e.total === 21 || (isBlackjack(h.cards) && !h.isFromSplit)) ? 'badge-bj' : '';
-      const badgeHtml = h.cards.length > 0 ? `<span class="hand-badge ${badgeCls}">${e.total}</span>` : '';
+
       const prevCount = prevPlayerCardCounts[i] || 0;
 
       html += `<div class="split-hand ${isActive ? 'active-hand' : ''}">
         <div class="hand-label">${label} &middot; $${h.bet}</div>
         <div class="hand-score">${scoreHtml}${resultHtml}</div>
-        <div class="cards-row">${h.cards.map((c, ci) => renderCard(c, false, ci >= prevCount)).join('')}${badgeHtml}</div>
+        <div class="cards-row">${h.cards.map((c, ci) => renderCard(c, false, ci >= prevCount)).join('')}</div>
       </div>`;
       prevPlayerCardCounts[i] = h.cards.length;
     }
