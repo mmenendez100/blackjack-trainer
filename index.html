@@ -3393,8 +3393,12 @@ function startHand(bet) {
     // Check for blackjack after all cards dealt
     if (isBlackjack(playerHands[0].cards) || isBlackjack(dealerHand)) {
       playerHands[0].done = true;
-      gamePhase = 'result';
-      settleAll();
+      // Pause to let player see the hands before revealing result
+      renderAll();
+      setTimeout(() => {
+        gamePhase = 'result';
+        settleAll();
+      }, 1500);
       return;
     }
 
@@ -3515,24 +3519,33 @@ function advanceHand() {
 function dealerTurn() {
   const allBusted = playerHands.every(h => evalHand(h.cards).busted);
 
-  // Flip the hole card first with animation
+  // Flip the hole card first with animation, then pause to read it
   const flipEl = document.querySelector('.card-flip-container');
   if (flipEl) {
     flipEl.classList.add('flipped');
+    // Render to show the revealed card total
+    setTimeout(() => { renderAll(); }, 600);
     setTimeout(() => {
       if (!allBusted) {
         dealerDrawSequence(0);
       } else {
-        gamePhase = 'result';
-        settleAll();
+        // Pause after flip so player can see dealer's hand
+        setTimeout(() => {
+          gamePhase = 'result';
+          settleAll();
+        }, 1200);
       }
-    }, 500);
+    }, 1500);
   } else {
     if (!allBusted) {
       while (evalHand(dealerHand).total < 17) dealerHand.push(drawCard());
     }
-    gamePhase = 'result';
-    settleAll();
+    // Pause before results
+    renderAll();
+    setTimeout(() => {
+      gamePhase = 'result';
+      settleAll();
+    }, 1200);
   }
 }
 
@@ -3543,8 +3556,12 @@ function dealerDrawSequence(idx) {
     renderAll();
     setTimeout(() => dealerDrawSequence(idx + 1), 1200);
   } else {
-    gamePhase = 'result';
-    settleAll();
+    // Pause to let player see dealer's final hand before results
+    renderAll();
+    setTimeout(() => {
+      gamePhase = 'result';
+      settleAll();
+    }, 1500);
   }
 }
 
