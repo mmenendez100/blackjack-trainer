@@ -1240,8 +1240,8 @@
   /* ─── Mobile ─── */
   @media (max-width: 640px) {
     :root {
-      --card-w: 95px;
-      --card-h: 133px;
+      --card-w: 88px;
+      --card-h: 123px;
     }
 
     body { padding: 0; }
@@ -1271,8 +1271,8 @@
     }
 
     #stats-strip {
-      padding: 0 10px 8px;
-      gap: 4px;
+      padding: 0 10px 4px;
+      gap: 3px;
       justify-content: center;
     }
 
@@ -1284,12 +1284,12 @@
     #table-wrapper { perspective: 800px; }
 
     #table {
-      border-radius: 60px 60px 8px 8px;
-      padding: 24px 12px 18px;
+      border-radius: 50px 50px 8px 8px;
+      padding: 16px 10px 10px;
       min-height: auto;
       margin: 0 4px;
-      transform: rotateX(1deg);
-      border-width: 5px;
+      transform: none;
+      border-width: 4px;
     }
 
     #table-trim {
@@ -1301,12 +1301,12 @@
     .table-title { font-size: 14px; letter-spacing: 2px; }
     .table-subtitle { font-size: 9px; letter-spacing: 1.5px; }
 
-    .hand-area { min-height: 100px; }
+    .hand-area { min-height: auto; margin-bottom: 4px; }
 
-    .hand-label { font-size: 10px; letter-spacing: 1px; }
-    .hand-score { font-size: 17px; margin-bottom: 6px; }
+    .hand-label { font-size: 10px; letter-spacing: 1px; margin-bottom: 2px; }
+    .hand-score { font-size: 15px; margin-bottom: 4px; }
 
-    .cards-row { gap: 6px; min-height: var(--card-h); }
+    .cards-row { gap: 4px; min-height: var(--card-h); }
 
     .card {
       padding: 6px 8px;
@@ -1327,7 +1327,7 @@
     .cards-row { margin-left: 18px; }
 
     #middle { gap: 8px; min-height: 40px; }
-    #message { font-size: 18px; font-weight: 700; }
+    #message { font-size: 16px; font-weight: 700; }
 
     /* Bet area: chips in a grid */
     #bet-area {
@@ -1439,9 +1439,9 @@
 
   /* Tall phone optimization (narrow + tall) */
   @media (max-width: 640px) and (min-height: 700px) {
-    #table { min-height: 480px; }
-    #middle { min-height: 100px; }
-    .hand-area { min-height: 120px; }
+    #table { min-height: auto; }
+    #middle { min-height: 40px; }
+    .hand-area { min-height: auto; }
   }
 
   /* Touch-friendly: prevent double-tap zoom on buttons */
