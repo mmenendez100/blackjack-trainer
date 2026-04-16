@@ -505,27 +505,27 @@
   /* ─── Card Shoe ─── */
   .card-shoe {
     position: absolute;
-    top: 20px;
-    right: 36px;
-    width: 70px;
-    height: 50px;
-    z-index: 3;
-    perspective: 200px;
+    top: 24px;
+    right: 32px;
+    width: 50px;
+    height: 36px;
+    z-index: 1;
+    opacity: 0.5;
   }
   .shoe-card {
     position: absolute;
-    width: 56px;
-    height: 38px;
-    border-radius: 4px;
-    background: linear-gradient(150deg, #8b1a1a, #a02020 50%, #8b1a1a);
-    border: 1px solid rgba(212,175,55,.12);
-    box-shadow: 0 1px 4px rgba(0,0,0,.5);
+    width: 40px;
+    height: 28px;
+    border-radius: 3px;
+    background: linear-gradient(150deg, #3d2d09, #4a3810 50%, #3d2d09);
+    border: 1px solid rgba(255,255,255,.06);
+    box-shadow: 0 1px 3px rgba(0,0,0,.5);
   }
   .shoe-card:nth-child(1) { top: 0; left: 0; }
-  .shoe-card:nth-child(2) { top: -3px; left: 1px; }
-  .shoe-card:nth-child(3) { top: -6px; left: 2px; }
-  .shoe-card:nth-child(4) { top: -9px; left: 3px; }
-  .shoe-card:nth-child(5) { top: -12px; left: 4px; }
+  .shoe-card:nth-child(2) { top: -2px; left: 1px; }
+  .shoe-card:nth-child(3) { top: -4px; left: 2px; }
+  .shoe-card:nth-child(4) { top: -6px; left: 3px; }
+  .shoe-card:nth-child(5) { top: -8px; left: 4px; }
 
   /* ─── Card Flip ─── */
   .card-flip-container {
@@ -558,6 +558,7 @@
     backface-visibility: hidden;
     transform: rotate(0deg);
     margin: 0;
+    animation: none !important;
   }
   .card-flip-inner > .card {
     -webkit-transform: rotateY(180deg);
@@ -651,8 +652,8 @@
   .btn {
     border: none;
     border-radius: 50px;
-    padding: 16px 32px;
-    font-size: 16px;
+    padding: 13px 26px;
+    font-size: 14px;
     font-family: inherit;
     font-weight: 700;
     cursor: pointer;
@@ -662,7 +663,7 @@
     position: relative;
     color: #fff;
     text-shadow: 0 2px 3px rgba(0,0,0,.5);
-    min-width: 100px;
+    min-width: 85px;
   }
   .btn:active { transform: translateY(4px); }
 
@@ -747,9 +748,10 @@
   /* ─── Action Buttons ─── */
   #actions {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     justify-content: center;
-    padding: 8px 0;
+    padding: 4px 0;
+    margin-top: 8px;
   }
 
   /* ─── Deal / Continue Button ─── */
@@ -3380,7 +3382,7 @@ function startHand(bet) {
   renderAll();
 
   // Stagger card dealing: player1, dealer1, player2, dealer2
-  const dealDelay = 550;
+  const dealDelay = 620;
   setTimeout(() => { playerHands[0].cards.push(pCard1); playSfx('deal'); renderAll(); }, dealDelay * 1);
   setTimeout(() => { dealerHand.push(dCard1); playSfx('deal'); renderAll(); }, dealDelay * 2);
   setTimeout(() => { playerHands[0].cards.push(pCard2); playSfx('deal'); renderAll(); }, dealDelay * 3);
