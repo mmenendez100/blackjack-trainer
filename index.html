@@ -1008,17 +1008,23 @@
   }
 
   /* ─── Hand result badges ─── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .result-badge {
     display: inline-block;
-    padding: 2px 10px;
+    padding: 4px 14px;
     border-radius: 12px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     margin-top: 4px;
+    animation: fadeIn .4s ease-out;
   }
-  .result-badge.win { background: rgba(74,222,128,.15); color: #4ade80; }
-  .result-badge.lose { background: rgba(248,113,113,.15); color: #f87171; }
-  .result-badge.push { background: rgba(212,175,55,.15); color: var(--gold); }
+  .result-badge.win { background: rgba(74,222,128,.15); color: #4ade80; border: 1px solid rgba(74,222,128,.2); }
+  .result-badge.lose { background: rgba(248,113,113,.15); color: #f87171; border: 1px solid rgba(248,113,113,.2); }
+  .result-badge.push { background: rgba(212,175,55,.15); color: var(--gold); border: 1px solid rgba(212,175,55,.2); }
 
   /* ─── Settings ─── */
   .settings-list {
@@ -1339,13 +1345,15 @@
     }
 
     .btn {
-      padding: 16px 10px;
-      font-size: 16px;
+      padding: 14px 8px;
+      font-size: 14px;
       min-width: 0;
       flex: 1;
       text-align: center;
-      border-radius: 30px;
+      border-radius: 26px;
     }
+
+    #actions { gap: 6px; flex-wrap: wrap; }
 
     /* Continue area */
     .bet-adjust { gap: 8px; }
@@ -3379,6 +3387,8 @@ function startHand(bet) {
   hideTip();
   hideFeedback();
   gamePhase = 'dealing';
+  dealerRevealed = false;
+  isDealing = true;
   prevDealerCardCount = 0;
   prevPlayerCardCounts = [0];
   renderAll();
@@ -3392,15 +3402,20 @@ function startHand(bet) {
     dealerHand.push(dCard2);
     playSfx('deal');
 
+    isDealing = false;
+
     // Check for blackjack after all cards dealt
     if (isBlackjack(playerHands[0].cards) || isBlackjack(dealerHand)) {
       playerHands[0].done = true;
-      // Pause to let player see the hands before revealing result
       renderAll();
       setTimeout(() => {
-        gamePhase = 'result';
-        settleAll();
-      }, 1500);
+        dealerRevealed = true;
+        renderAll();
+        setTimeout(() => {
+          gamePhase = 'result';
+          settleAll();
+        }, 1500);
+      }, 1000);
       return;
     }
 
@@ -3432,22 +3447,31 @@ function recordDecision(action) {
 }
 
 function playerHit() {
-  if (gamePhase !== 'playing') return;
+  if (gamePhase !== 'playing' || isDealing) return;
   hideTip();
+  isDealing = true; // Lock during hit animation
   recordDecision('H');
   const h = currentHand();
   h.cards.push(drawCard());
   playSfx('deal');
+  renderAll();
   if (evalHand(h.cards).busted || evalHand(h.cards).total === 21) {
     h.done = true;
-    advanceHand();
+    // Pause to let user see bust/21 before advancing
+    setTimeout(() => {
+      isDealing = false;
+      advanceHand();
+      renderAll();
+      if (gamePhase === 'playing' && settings.autoTip) showTip();
+    }, 1000);
+    return;
   }
-  renderAll();
+  isDealing = false;
   if (gamePhase === 'playing' && settings.autoTip) showTip();
 }
 
 function playerStand() {
-  if (gamePhase !== 'playing') return;
+  if (gamePhase !== 'playing' || isDealing) return;
   hideTip();
   recordDecision('S');
   currentHand().done = true;
@@ -3456,22 +3480,28 @@ function playerStand() {
 }
 
 function playerDouble() {
-  if (gamePhase !== 'playing') return;
+  if (gamePhase !== 'playing' || isDealing) return;
   const h = currentHand();
   if (h.cards.length !== 2 || chips < h.bet) return;
   hideTip();
+  isDealing = true;
   recordDecision('D');
   chips -= h.bet;
   h.bet *= 2;
   h.cards.push(drawCard());
   playSfx('deal');
   h.done = true;
-  advanceHand();
   renderAll();
+  // Pause to see the double card before advancing
+  setTimeout(() => {
+    isDealing = false;
+    advanceHand();
+    renderAll();
+  }, 1000);
 }
 
 function playerSplit() {
-  if (gamePhase !== 'playing') return;
+  if (gamePhase !== 'playing' || isDealing) return;
   const h = currentHand();
   if (h.cards.length !== 2 || !isPair(h.cards) || playerHands.length >= 4 || chips < h.bet) return;
   hideTip();
@@ -3494,6 +3524,10 @@ function playerSplit() {
     isSplitAces: isAces,
   };
   playerHands.splice(activeHandIdx + 1, 0, newHand);
+
+  // Set card counts so only new drawn cards animate (not the moved original cards)
+  prevPlayerCardCounts[activeHandIdx] = 1; // Original card stays, new drawn card animates
+  prevPlayerCardCounts.splice(activeHandIdx + 1, 0, 1); // Moved card stays, new drawn card animates
 
   if (isAces) {
     h.done = true;
@@ -3521,34 +3555,25 @@ function advanceHand() {
 function dealerTurn() {
   const allBusted = playerHands.every(h => evalHand(h.cards).busted);
 
-  // Flip the hole card first with animation, then pause to read it
+  // Start the flip animation visually
   const flipEl = document.querySelector('.card-flip-container');
-  if (flipEl) {
-    flipEl.classList.add('flipped');
-    // Render to show the revealed card total
-    setTimeout(() => { renderAll(); }, 600);
+  if (flipEl) flipEl.classList.add('flipped');
+
+  // After flip animation completes (600ms), re-render with all dealer cards face-up
+  setTimeout(() => {
+    dealerRevealed = true;
+    renderAll(); // Clean render — all dealer cards face-up, no flip container needed
+
+    // Pause to let player read the dealer's hand
     setTimeout(() => {
       if (!allBusted) {
         dealerDrawSequence(0);
       } else {
-        // Pause after flip so player can see dealer's hand
-        setTimeout(() => {
-          gamePhase = 'result';
-          settleAll();
-        }, 1200);
+        gamePhase = 'result';
+        settleAll();
       }
-    }, 1500);
-  } else {
-    if (!allBusted) {
-      while (evalHand(dealerHand).total < 17) dealerHand.push(drawCard());
-    }
-    // Pause before results
-    renderAll();
-    setTimeout(() => {
-      gamePhase = 'result';
-      settleAll();
     }, 1200);
-  }
+  }, 700);
 }
 
 function dealerDrawSequence(idx) {
@@ -3669,6 +3694,8 @@ let cardIdx = 0;
 // Track how many cards were rendered last time so only new cards animate
 let prevDealerCardCount = 0;
 let prevPlayerCardCounts = [];
+let dealerRevealed = false;
+let isDealing = false;
 
 function renderCard(card, faceDown, shouldAnimate) {
   const rot = ((cardIdx++ * 1.7) % 5 - 2.5).toFixed(1);
@@ -3707,7 +3734,7 @@ function renderAll() {
     dealerScoreEl.innerHTML = '';
     prevDealerCardCount = 0;
   } else {
-    const showAll = gamePhase === 'result';
+    const showAll = gamePhase === 'result' || dealerRevealed;
     let dealerCardsHtml = dealerHand.map((c, i) => {
       const isNew = i >= prevDealerCardCount;
       return renderCard(c, i === 1 && !showAll, isNew);
